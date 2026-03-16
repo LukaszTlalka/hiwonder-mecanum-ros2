@@ -38,13 +38,17 @@ void encoder_update(EncoderMotorObjectTypeDef *self, float period, int64_t count
 */
 void encoder_motor_control(EncoderMotorObjectTypeDef *self, float period)
 {
-    /* When stopped: coast to zero, reset PID state so accumulated pulse can't spin the motor */
+    /* When stopped: actively brake via PID until nearly still, then coast and reset. */
     if (self->pid_controller.set_point == 0.0f) {
-        self->set_pulse(self, 0);
-        self->current_pulse = 0;
-        self->pid_controller.previous_0_err = 0;
-        self->pid_controller.previous_1_err = 0;
-        return;
+        if (self->rps > -0.05f && self->rps < 0.05f) {
+            /* Close enough to stopped — cut PWM and clear PID state. */
+            self->set_pulse(self, 0);
+            self->current_pulse = 0;
+            self->pid_controller.previous_0_err = 0;
+            self->pid_controller.previous_1_err = 0;
+            return;
+        }
+        /* Still moving — fall through so the PID generates counter-torque. */
     }
 
 	float pulse = 0;
