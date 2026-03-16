@@ -1,0 +1,16 @@
+# Build output
+build/
+
+# Keil MDK IDE (large, not needed for GCC build)
+MDK-ARM/
+
+# Source Insight project
+SI/
+
+# Claude session files
+.claude/
+
+# Misc
+t.py
+*.elf
+*.map
